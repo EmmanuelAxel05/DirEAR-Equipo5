@@ -1,28 +1,66 @@
-import { collection, addDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase/config";
-import { supabase } from "../supabase/config";
+function listaTexto(valor) {
+  if (Array.isArray(valor)) {
+    return valor.filter(
+      (item) => typeof item === "string" && item.trim()
+    );
+  }
 
-export async function guardarTema(tema) {
-  // 1) Firebase (fuente que lee la página)
-  const ref = await addDoc(collection(db, "temas"), {
-    ...tema,
-    creado: serverTimestamp(),
-  });
+  return typeof valor === "string"
+    ? valor
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+}
 
-  // 2) Supabase (respaldo; si falla, no se pierde el tema)
-  const { error } = await supabase.from("temas").insert({
-    firestore_id: ref.id,
-    unidad: tema.unidad,
-    orden: tema.orden,
-    titulo: tema.titulo,
-    datos: tema,
-  });
-  if (error) console.warn("Supabase:", error.message);
+// Adapta los campos reales de Firebase al diseño de TemaDetalle.
+export function normalizarRegistro(id, datos) {
+  const subtemas = Array.isArray(datos.subtemas)
+    ? datos.subtemas
+    : [];
 
-  return { id: ref.id, supabaseOk: !error };
+  return {
+    id,
+    unidad: Number(datos.unidad),
+    titulo: datos.tema || "Sin título",
+    descripcion: datos.informacionTema || "",
+
+    subtemas: subtemas.map((s) => ({
+      titulo: s.titulo || "",
+      texto: s.descripcion || "",
+    })),
+
+    imagenes: subtemas
+      .filter(
+        (s) =>
+          typeof s.imageUrl === "string" &&
+          s.imageUrl.trim()
+      )
+      .map((s) => ({
+        src: s.imageUrl,
+        alt: s.titulo || "Imagen del subtema",
+      })),
+
+    webinar: datos.linkWebinar || "",
+    reel: datos.linkReel || "",
+
+    actividad: {
+      titulo: datos.urlActividadPDF ? "Actividad (PDF)" : "",
+      descripcion: datos.urlActividadPDF || "",
+    },
+
+    calificaciones: datos.urlCalificacionesExcel || "",
+    fuentes: listaTexto(datos.fuentes),
+    integrantes: listaTexto(datos.integrantes),
+  };
 }
 
 export async function obtenerTema(id) {
-  const snap = await getDoc(doc(db, "temas", id));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const snap = await getDoc(
+    doc(db, "registros_equipos", id)
+  );
+
+  return snap.exists()
+    ? normalizarRegistro(snap.id, snap.data())
+    : null;
 }
