@@ -1,0 +1,6 @@
+[build]
+  # Install dependencies if they are not present yet (node_modules is no
+  # longer committed), then run Vite through Node directly so the build never
+  # depends on the execute bit of node_modules/.bin/vite.
+  command = "(test -f node_modules/vite/bin/vite.js || npm ci --no-audit --no-fund) && node node_modules/vite/bin/vite.js build"
+  publish = "dist"
