@@ -27,6 +27,24 @@ function Layout() {
             <NavLink to="/objetivos">Objetivos</NavLink>
             <NavLink to="/unidad-1">Unidad 1</NavLink>
             <NavLink to="/unidad-2">Unidad 2</NavLink>
+            
+            {/* NUEVO BOTÓN DE INICIAR SESIÓN */}
+            <NavLink 
+              to="/login" 
+              style={({ isActive }) => ({ 
+                marginLeft: "1.5rem", 
+                padding: "0.6rem 1.5rem", 
+                backgroundColor: isActive ? "#1d6d65" : "#278C83", 
+                color: "white", 
+                borderRadius: "50px", 
+                fontWeight: "700",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
+                boxShadow: "0 4px 10px rgba(39, 140, 131, 0.2)"
+              })}
+            >
+              Iniciar Sesión
+            </NavLink>
           </nav>
         </div>
       </header>
