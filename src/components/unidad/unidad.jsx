@@ -3,6 +3,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { unidades } from "../../data/contenido";
 import Reveal from "../reveal/Reveal";
+import { Link } from "react-router-dom";
 
 function Unidad({ numero }) {
   const unidad = unidades.find((u) => u.numero === numero);
@@ -33,6 +34,12 @@ function Unidad({ numero }) {
     };
   }, [numero]);
 
+  // La tarjeta estática del Tema 1 se oculta si ya existe en la base de datos
+  const mostrarEstatica =
+    numero === 1 &&
+    !cargando &&
+    !temas.some((t) => t.titulo === "Teoría de las Necesidades");
+
   return (
     <section className="seccion">
       <div className="unidad-cabecera">
@@ -56,16 +63,39 @@ function Unidad({ numero }) {
 
       {cargando && <p className="mensaje">Cargando temas...</p>}
       {error && <p className="mensaje">No se pudieron cargar los temas en este momento.</p>}
-      {!cargando && !error && temas.length === 0 && (
+      {!cargando && !error && temas.length === 0 && !mostrarEstatica && (
         <p className="mensaje">Aún no hay temas registrados para esta unidad.</p>
       )}
 
       <div className="temas">
+        {mostrarEstatica && (
+          <Reveal>
+            <article className="tema">
+              <h3>Teoría de las Necesidades</h3>
+              <p>Primer tema de la Unidad 1.</p>
+              <Link
+                className="btn"
+                style={{ marginTop: "0.9rem" }}
+                to="/unidad-1/teoria-de-las-necesidades"
+              >
+                Explorar tema
+              </Link>
+            </article>
+          </Reveal>
+        )}
+
         {temas.map((t, i) => (
           <Reveal key={t.id} delay={i * 100}>
             <article className="tema">
               <h3>{t.titulo}</h3>
               {t.descripcion && <p>{t.descripcion}</p>}
+              <Link
+                className="btn"
+                style={{ marginTop: "0.9rem" }}
+                to={`/tema/${t.id}`}
+              >
+                Explorar tema
+              </Link>
             </article>
           </Reveal>
         ))}

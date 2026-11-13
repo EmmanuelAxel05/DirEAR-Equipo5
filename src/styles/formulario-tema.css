@@ -1,0 +1,23 @@
+.ft { display: grid; gap: 1rem; max-width: 820px; margin: 0 auto; }
+.ft label { display: grid; gap: 0.35rem; font-weight: 600; color: var(--azul); }
+.ft input, .ft select, .ft textarea {
+  font: inherit; padding: 0.65rem 0.8rem; border: 2px solid var(--menta);
+  border-radius: 10px; background: var(--blanco); color: var(--texto);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ft input:focus, .ft select:focus, .ft textarea:focus {
+  outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(39, 140, 131, 0.2);
+}
+.ft__fila { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.ft__sub {
+  display: grid; gap: 0.5rem; padding: 0.9rem; background: var(--fondo);
+  border-left: 5px solid var(--verde); border-radius: 12px;
+}
+.ft__mas, .ft__quitar {
+  justify-self: start; cursor: pointer; font: inherit; font-weight: 600;
+  border-radius: 999px; padding: 0.4rem 1rem; transition: transform 0.2s;
+}
+.ft__mas { border: 2px dashed var(--verde); background: transparent; color: var(--verde); }
+.ft__quitar { border: 0; background: var(--acento); color: var(--azul); }
+.ft__mas:hover, .ft__quitar:hover { transform: translateY(-2px); }
+.ft__error { color: #b3261e; font-weight: 600; }
