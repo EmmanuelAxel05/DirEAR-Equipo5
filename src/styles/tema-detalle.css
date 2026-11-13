@@ -96,7 +96,7 @@
   animation: td-pulso 3s ease-in-out infinite;
 }
 
-/* ---------- Subtemas ---------- */
+/* ---------- Subtemas (versión anterior, se conserva) ---------- */
 .td-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
@@ -134,7 +134,7 @@
 .td-item h3 { margin: 0 2.4rem 0.5rem 0; font-size: 1.02rem; color: var(--azul); line-height: 1.35; }
 .td-item p { margin: 0; line-height: 1.65; font-size: 0.95rem; }
 
-/* ---------- Galería ---------- */
+/* ---------- Galería (versión anterior, se conserva) ---------- */
 .td-galeria { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
 .td-galeria__fig { margin: 0; border-radius: 14px; overflow: hidden; position: relative; box-shadow: 0 6px 16px rgba(25, 59, 90, 0.15); }
 .td-galeria__fig img { width: 100%; height: 210px; object-fit: cover; display: block; transition: transform 0.5s; }
@@ -149,6 +149,171 @@
   transition: transform 0.3s;
 }
 .td-galeria__fig:hover figcaption { transform: translateY(0); }
+
+/* ========== NUEVO: Fichas que voltean ========== */
+.td-flip__ayuda {
+  margin: -0.4rem 0 1rem;
+  color: var(--verde);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.td-flipgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Reset del botón */
+.td-flip {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 320px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  perspective: 1200px;
+  -webkit-tap-highlight-color: transparent;
+}
+.td-flip:focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 4px;
+  border-radius: 16px;
+}
+
+.td-flip__interior {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.td-flip--volteada .td-flip__interior { transform: rotateY(180deg); }
+
+/* Hover: borde resaltado, sin filter (el filter rompe el 3D y causa transparencia) */
+.td-flip__cara {
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.td-flip:hover .td-flip__frente,
+.td-flip:focus-visible .td-flip__frente {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px rgba(242, 182, 109, 0.55);
+}
+.td-flip:hover .td-flip__reverso,
+.td-flip:focus-visible .td-flip__reverso {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(39, 140, 131, 0.45);
+}
+
+.td-flip__cara {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 16px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Frente */
+.td-flip__frente {
+  background: linear-gradient(135deg, var(--azul), var(--verde));
+  border: 3px solid var(--menta);
+}
+.td-flip__frente img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.td-flip__sinimg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--blanco);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.td-flip__titulo {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 2.2rem 1rem 0.9rem;
+  color: var(--blanco);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.3;
+  background: linear-gradient(transparent, rgba(25, 59, 90, 0.95));
+}
+.td-flip__frente .td-flip__titulo::after {
+  content: "Toca para ver más ↻";
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--menta);
+}
+
+.td-flip__num {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.8rem;
+  min-width: 2.2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--acento);
+  color: var(--azul);
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Reverso */
+.td-flip__reverso {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 3.2rem 1.2rem 1.2rem;
+  background: var(--fondo);
+  border: 3px solid var(--acento);
+  color: var(--azul);
+  overflow-y: auto;
+}
+.td-flip__reverso strong {
+  font-size: 1.02rem;
+  line-height: 1.35;
+  color: var(--azul);
+}
+.td-flip__texto {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #2b3a46;
+}
+.td-flip__num--reverso { background: var(--verde); color: var(--blanco); }
+
+/* ========== NUEVO: Enlaces (actividad, calificaciones, fuentes) ========== */
+.td-enlace {
+  display: inline-block;
+  color: var(--verde);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-word;
+  transition: color 0.2s, transform 0.2s;
+}
+.td-enlace:hover { color: var(--azul); transform: translateX(3px); }
 
 /* ---------- Videos ---------- */
 .td-videos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; align-items: start; }
@@ -191,6 +356,7 @@
 @media (max-width: 600px) {
   .td-hero { padding: 1.75rem 1.1rem; }
   .td-item__num { font-size: 2rem; }
+  .td-flip { height: 300px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .td *, .td *::before, .td *::after { animation: none !important; transition: none !important; }

@@ -16,6 +16,15 @@ function listaTexto(valor) {
     : [];
 }
 
+// Busca la URL de la imagen sin importar cómo se haya guardado el campo.
+function urlImagen(s) {
+  const candidatos = [s?.imagenUrl, s?.imageUrl, s?.imagen];
+  const url = candidatos.find(
+    (v) => typeof v === "string" && v.trim()
+  );
+  return url ? url.trim() : "";
+}
+
 // Adapta los campos reales de Firebase al diseño de TemaDetalle.
 export function normalizarRegistro(id, datos) {
   const subtemas = Array.isArray(datos.subtemas)
@@ -31,16 +40,13 @@ export function normalizarRegistro(id, datos) {
     subtemas: subtemas.map((s) => ({
       titulo: s.titulo || "",
       texto: s.descripcion || "",
+      imagen: urlImagen(s),
     })),
 
     imagenes: subtemas
-      .filter(
-        (s) =>
-          typeof s.imagenUrl === "string" && // Nota: corregí "imageUrl" por "imagenUrl" que es como lo guarda tu formulario
-          s.imagenUrl.trim()
-      )
+      .filter((s) => urlImagen(s))
       .map((s) => ({
-        src: s.imagenUrl,
+        src: urlImagen(s),
         alt: s.titulo || "Imagen del subtema",
       })),
 
@@ -59,18 +65,13 @@ export function normalizarRegistro(id, datos) {
 }
 
 export async function obtenerTema(id) {
-  const snap = await getDoc(
-    doc(db, "registros_equipos", id)
-  );
+  const snap = await getDoc(doc(db, "registros_equipos", id));
 
   return snap.exists()
     ? normalizarRegistro(snap.id, snap.data())
     : null;
 }
 
-// ==========================================
-// NUEVA FUNCIÓN AGREGADA
-// ==========================================
 export async function guardarTema(datos, id = null) {
   try {
     // Si ya tenemos un ID, actualizamos el documento
@@ -78,12 +79,10 @@ export async function guardarTema(datos, id = null) {
       const docRef = doc(db, "registros_equipos", id);
       await updateDoc(docRef, datos);
       return id;
-    } 
-    // Si no hay ID, creamos un documento nuevo
-    else {
-      const docRef = await addDoc(collection(db, "registros_equipos"), datos);
-      return docRef.id;
     }
+    // Si no hay ID, creamos un documento nuevo
+    const docRef = await addDoc(collection(db, "registros_equipos"), datos);
+    return docRef.id;
   } catch (error) {
     console.error("Error al guardar el tema en Firestore:", error);
     throw error;

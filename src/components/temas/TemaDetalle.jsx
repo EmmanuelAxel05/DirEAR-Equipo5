@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Reveal from "../reveal/Reveal";
 import "../../styles/tema-detalle.css";
@@ -6,6 +7,8 @@ function ytId(url = "") {
   const m = url.match(/(?:youtu\.be\/|shorts\/|v=|embed\/)([\w-]{11})/);
   return m ? m[1] : null;
 }
+
+const esUrl = (txt = "") => /^https?:\/\//i.test(txt.trim());
 
 function Seccion({ titulo, icono, children, delay = 0 }) {
   return (
@@ -37,16 +40,50 @@ function Video({ url, etiqueta, vertical }) {
           />
         </div>
       ) : null}
-      <a className="btn" href={url} target="_blank" rel="noreferrer">
+      <a className="btn" href={url} target="_blank" rel="noopener noreferrer">
         Abrir en YouTube
       </a>
     </div>
   );
 }
 
+/* Ficha: imagen al frente, información al reverso */
+function FichaVolteable({ numero, subtema }) {
+  const [volteada, setVolteada] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className={`td-flip ${volteada ? "td-flip--volteada" : ""}`}
+      onClick={() => setVolteada((v) => !v)}
+      aria-pressed={volteada}
+      aria-label={`${subtema.titulo}. ${volteada ? "Ocultar" : "Ver"} información`}
+    >
+      <span className="td-flip__interior">
+        {/* Frente */}
+        <span className="td-flip__cara td-flip__frente">
+          {subtema.imagen ? (
+            <img src={subtema.imagen} alt={subtema.titulo} loading="lazy" />
+          ) : (
+            <span className="td-flip__sinimg">{subtema.titulo}</span>
+          )}
+          <span className="td-flip__num">{numero}</span>
+          <span className="td-flip__titulo">{subtema.titulo}</span>
+        </span>
+
+        {/* Reverso */}
+        <span className="td-flip__cara td-flip__reverso">
+          <span className="td-flip__num td-flip__num--reverso">{numero}</span>
+          <strong>{subtema.titulo}</strong>
+          <span className="td-flip__texto">{subtema.texto}</span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
 function TemaDetalle({ tema, numeroTema }) {
   const subtemas = tema.subtemas || [];
-  const imagenes = tema.imagenes || [];
   const fuentes = tema.fuentes || [];
   const integrantes = tema.integrantes || [];
   const act = tema.actividad || {};
@@ -76,35 +113,26 @@ function TemaDetalle({ tema, numeroTema }) {
         </header>
       </Reveal>
 
+      {/* Subtemas + imágenes combinados en fichas que voltean */}
       {subtemas.length > 0 && (
         <Seccion titulo="Subtemas" icono="📚">
-          <div className="td-grid">
+          <p className="td-flip__ayuda">
+            Haz clic en una ficha para ver su información.
+          </p>
+          <div className="td-flipgrid">
             {subtemas.map((s, i) => (
-              <Reveal key={i} direction="up" delay={i * 90}>
-                <div className="td-item">
-                  <span className="td-item__num">{String(i + 1).padStart(2, "0")}</span>
-                  <h3>{s.titulo}</h3>
-                  <p>{s.texto}</p>
-                </div>
+              <Reveal key={i} direction="up" delay={i * 70}>
+                <FichaVolteable
+                  numero={String(i + 1).padStart(2, "0")}
+                  subtema={s}
+                />
               </Reveal>
             ))}
           </div>
         </Seccion>
       )}
 
-      {imagenes.length > 0 && (
-        <Seccion titulo="Galería" icono="🖼️">
-          <div className="td-galeria">
-            {imagenes.map((img, i) => (
-              <figure key={i} className="td-galeria__fig">
-                <img src={img.src} alt={img.alt || tema.titulo} loading="lazy" />
-                {img.alt && <figcaption>{img.alt}</figcaption>}
-              </figure>
-            ))}
-          </div>
-        </Seccion>
-      )}
-
+      {/* Webinar y reel */}
       {(tema.webinar || tema.reel) && (
         <Seccion titulo="Recursos multimedia" icono="🎥">
           <div className="td-videos">
@@ -114,36 +142,73 @@ function TemaDetalle({ tema, numeroTema }) {
         </Seccion>
       )}
 
-      {act.titulo && (
+      {/* Actividad: hipervínculo en otra pestaña */}
+      {act.descripcion && (
         <Seccion titulo="Actividad" icono="📝">
-          <h3>{act.titulo}</h3>
-          {act.descripcion && <p>{act.descripcion}</p>}
+          <h3>{act.titulo || "Actividad"}</h3>
+          {esUrl(act.descripcion) ? (
+            <a
+              className="td-enlace"
+              href={act.descripcion}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir actividad en otra pestaña ↗
+            </a>
+          ) : (
+            <p>{act.descripcion}</p>
+          )}
         </Seccion>
       )}
 
+      {/* Calificaciones */}
       {tema.calificaciones && (
         <Seccion titulo="Calificaciones" icono="📊">
-          <a className="btn" href={tema.calificaciones} download>
-            Descargar Excel
-          </a>
+          {esUrl(tema.calificaciones) ? (
+            <a
+              className="td-enlace"
+              href={tema.calificaciones}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir calificaciones en otra pestaña ↗
+            </a>
+          ) : (
+            <p>{tema.calificaciones}</p>
+          )}
         </Seccion>
       )}
 
+      {/* Fuentes */}
       {fuentes.length > 0 && (
         <Seccion titulo="Fuentes" icono="🔗">
           <ul className="td-lista">
             {fuentes.map((f, i) => (
-              <li key={i}>{f}</li>
+              <li key={i}>
+                {esUrl(f) ? (
+                  <a
+                    className="td-enlace"
+                    href={f}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {f}
+                  </a>
+                ) : (
+                  f
+                )}
+              </li>
             ))}
           </ul>
         </Seccion>
       )}
 
+      {/* Integrantes */}
       {integrantes.length > 0 && (
-        <Seccion titulo="Integrantes del equipo" icono="👥">
+        <Seccion titulo="Integrantes" icono="👥">
           <div className="td-chips">
             {integrantes.map((n, i) => (
-              <span className="td-chip" key={i} style={{ animationDelay: `${i * 80}ms` }}>
+              <span key={i} className="td-chip">
                 {n}
               </span>
             ))}

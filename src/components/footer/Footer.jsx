@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { unidades, integrantes } from "../../data/contenido";
 import logo from "../../assets/logo-utn.png";
@@ -9,19 +9,29 @@ function Footer() {
   const [temas, setTemas] = useState([]);
 
   useEffect(() => {
-    let activo = true;
-    getDocs(collection(db, "temas"))
-      .then((snap) => {
-        if (!activo) return;
+    const cancelar = onSnapshot(
+      collection(db, "registros_equipos"),
+      (snap) => {
         const lista = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+          .map((d) => {
+            const datos = d.data();
+            return {
+              id: d.id,
+              unidad: Number(datos.unidad),
+              titulo: datos.tema || "Sin título",
+              orden: datos.orden ?? 0,
+            };
+          })
+          .sort(
+            (a, b) =>
+              a.orden - b.orden || a.titulo.localeCompare(b.titulo, "es")
+          );
         setTemas(lista);
-      })
-      .catch(() => activo && setTemas([]));
-    return () => {
-      activo = false;
-    };
+      },
+      () => setTemas([])
+    );
+
+    return () => cancelar();
   }, []);
 
   return (
@@ -50,7 +60,7 @@ function Footer() {
           </ul>
         </div>
 
-        {/* Unidades y temas desde Firebase */}
+        {/* Unidades y temas (hipervínculos a cada tema) */}
         {unidades.map((u) => {
           const temasUnidad = temas.filter((t) => t.unidad === u.numero);
           return (
@@ -66,7 +76,7 @@ function Footer() {
                 ) : (
                   temasUnidad.map((t) => (
                     <li key={t.id}>
-                      <Link to={u.ruta}>{t.titulo}</Link>
+                      <Link to={`/tema/${t.id}`}>{t.titulo}</Link>
                     </li>
                   ))
                 )}
