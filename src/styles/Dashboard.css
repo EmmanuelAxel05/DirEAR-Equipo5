@@ -12,12 +12,12 @@
   --sidebar-width: 280px;
 }
 
-/* BLOQUEO GLOBAL DE SCROLL */
+/* ESTILOS GLOBALES */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
 html, body, #root { 
   width: 100%; 
-  height: 100%; 
-  overflow: hidden; /* Evita que toda la página se desplace */
+  /* height: 100%; <-- ELIMINADO */
+  /* overflow: hidden; <-- ELIMINADO */
   background-color: var(--fondo-app); 
   color: var(--azul-institucional); 
 }
