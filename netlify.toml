@@ -1,0 +1,5 @@
+[build]
+  # Run Vite through Node directly so the build never depends on the
+  # execute bit of node_modules/.bin/vite.
+  command = "node node_modules/vite/bin/vite.js build"
+  publish = "dist"
