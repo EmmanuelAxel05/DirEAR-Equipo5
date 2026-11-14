@@ -9,12 +9,12 @@ import MiRegistro from "../components/MiRegistro";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
-  
+
   // 1. Verificamos si el usuario logueado es el profesor
   const isProfesor = user?.perfil?.trim()?.toLowerCase() === "profesor";
 
   const [isMenuOpen, setIsMenuOpen] = useState(window.innerWidth > 1024);
-  
+
   // 2. Si es profesor, la vista inicial es "evaluaciones". Si es alumno, es "inicio".
   const [activeView, setActiveView] = useState(isProfesor ? "evaluaciones" : "inicio");
 
@@ -25,10 +25,12 @@ export default function Dashboard() {
     if (window.innerWidth <= 1024) setIsMenuOpen(false);
   };
 
-  // 3. Candado de seguridad: Si el profesor intenta cambiar de vista por error, lo regresamos a Evaluaciones
+  // 3. Candado de seguridad según el perfil
   useEffect(() => {
     if (isProfesor && activeView !== "evaluaciones") {
       setActiveView("evaluaciones");
+    } else if (!isProfesor && activeView === "evaluaciones") {
+      setActiveView("inicio");
     }
   }, [isProfesor, activeView]);
 
@@ -37,7 +39,7 @@ export default function Dashboard() {
       {isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
 
       <aside className={`sidebar ${isMenuOpen ? "open" : ""}`}>
-        
+
         {/* HEADER DEL SIDEBAR */}
         <div className="sidebar-header">
           <div className="logo-container">
@@ -59,10 +61,10 @@ export default function Dashboard() {
         </div>
 
         <div className="menu-section-title">MENÚ PRINCIPAL</div>
-        
+
         {/* NAVEGACIÓN CONDICIONAL */}
         <nav className="sidebar-nav">
-          
+
           {/* SI NO ES PROFESOR, MOSTRAMOS ESTOS BOTONES */}
           {!isProfesor && (
             <>
@@ -101,16 +103,18 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* EVALUACIONES SE MUESTRA SIEMPRE (para alumnos y profesor) */}
-          <button className={`nav-btn ${activeView === "evaluaciones" ? "active" : ""}`} onClick={() => handleNavClick("evaluaciones")}>
-            <span className="nav-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
-                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
-              </svg>
-            </span>
-            <span className="nav-text">Evaluaciones</span>
-          </button>
+          {/* EVALUACIONES: SOLO PARA EL PROFESOR */}
+          {isProfesor && (
+            <button className={`nav-btn ${activeView === "evaluaciones" ? "active" : ""}`} onClick={() => handleNavClick("evaluaciones")}>
+              <span className="nav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                  <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                </svg>
+              </span>
+              <span className="nav-text">Evaluaciones</span>
+            </button>
+          )}
         </nav>
 
         {/* FOOTER DEL SIDEBAR */}
@@ -146,13 +150,13 @@ export default function Dashboard() {
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          
+
           {/* TÍTULO DINÁMICO DE LA BARRA SUPERIOR */}
           <h1 className="topbar-title">
             {activeView === "inicio" && "Panel Principal"}
             {activeView === "formulario" && "Formularios CRUD"}
             {activeView === "mi-registro" && "Mi Registro"}
-            {activeView === "evaluaciones" && "Evaluaciones"}
+            {activeView === "evaluaciones" && isProfesor && "Evaluaciones"}
           </h1>
         </header>
 
@@ -161,7 +165,7 @@ export default function Dashboard() {
           {activeView === "inicio" && <Inicio user={user} goToForm={() => setActiveView("formulario")} />}
           {activeView === "formulario" && <FormularioCRUD goToView={() => setActiveView("mi-registro")} />}
           {activeView === "mi-registro" && <MiRegistro goToForm={() => setActiveView("formulario")} />}
-          {activeView === "evaluaciones" && <Evaluaciones />}
+          {activeView === "evaluaciones" && isProfesor && <Evaluaciones />}
         </div>
       </main>
     </div>
